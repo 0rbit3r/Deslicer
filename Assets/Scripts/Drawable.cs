@@ -6,19 +6,40 @@ using UnityEngine.UI;
 public class Drawable : MonoBehaviour
 {
 
-    Texture2D t2D;
+    Texture2D[] textures;
     RawImage rawImage;
     RectTransform rect;
     int width, height;
+    int layers = 10;
+    int currentLayer;
+    GameObject[] previews;
 
     // Start is called before the first frame update
     void Start()
     {
-        rawImage = GetComponent<RawImage>();
-        t2D = rawImage.texture as Texture2D;
         rect = GetComponent<RectTransform>();
-        width = t2D.width;
-        height = t2D.height;
+        width = (int)rect.rect.width;
+        height = (int)rect.rect.height;
+
+        rawImage = GetComponent<RawImage>();
+        textures = new Texture2D[layers];
+        for (int i = 0; i < layers; i++)
+        {
+            textures[i] = new Texture2D(width, height);
+            textures[i].filterMode = FilterMode.Point;
+            ResetToBlack(i);
+        }
+        currentLayer = 0;
+        rawImage.texture = textures[currentLayer];
+
+        previews = new GameObject[layers];
+        for (int i = 0; i < layers; i++)
+        {
+            previews[i] = GameObject.Find("Preview" + i);
+            RawImage image = previews[i].GetComponent<RawImage>();
+            image.texture = textures[i];
+            image.texture.filterMode = FilterMode.Point;
+        }
     }
 
     // Update is called once per frame
@@ -35,8 +56,7 @@ public class Drawable : MonoBehaviour
             {
                 //print(mousePos.x + " " + mousePos.y);
 
-                paintCircle(mousePos, 5, Color.red);
-                t2D.Apply();
+                paintCircle(mousePos, 2, Color.red);
             }
         }
         else if (Input.GetMouseButton(1))
@@ -50,8 +70,8 @@ public class Drawable : MonoBehaviour
             {
                 //print(mousePos.x + " " + mousePos.y);
 
-                paintCircle(mousePos, 5, Color.black);
-                t2D.Apply();
+                paintCircle(mousePos, 2, Color.black);
+                
             }
         }
     }
@@ -62,12 +82,18 @@ public class Drawable : MonoBehaviour
         {
             for (int x = -rad + 1; x < rad; x++)
             {
-                t2D.SetPixel((int)(center.x + x), (int)(center.y + y), color);
+                if(y*y + x*x < rad*rad)
+                textures[currentLayer].SetPixel((int)(center.x + x), (int)(center.y + y), color);
             }
         }
+        textures[currentLayer].Apply();
     }
 
-    public void ResetToBlack()
+    public void ResetCurrentToBlack()
+    {
+        ResetToBlack(currentLayer);
+    }
+    public void ResetToBlack(int layer)
     {
         var resetColor = new Color32(0, 0, 0, 255);
         var resetArray = new Color32[width*height];
@@ -75,7 +101,13 @@ public class Drawable : MonoBehaviour
         {
             resetArray[i] = resetColor;
         }
-        t2D.SetPixels32(resetArray);
-        t2D.Apply();
+        textures[layer].SetPixels32(resetArray);
+        textures[layer].Apply();
+    }
+
+    public void ChangeLayer(System.Single layer)
+    {
+        currentLayer = (int)layer;
+        rawImage.texture = textures[currentLayer];
     }
 }
