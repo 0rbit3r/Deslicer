@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class Drawable : MonoBehaviour
 {
+    
+    public int rad = 2;
 
     Texture2D[] textures;
     RawImage rawImage;
@@ -49,41 +51,41 @@ public class Drawable : MonoBehaviour
         {
             Vector2 mousePos;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, Input.mousePosition, Camera.main, out mousePos);
-            mousePos.x = mousePos.x + (width / 2);
-            mousePos.y = mousePos.y + (height / 2);
+            mousePos.x = mousePos.x + (width / 2) + 0.5f;
+            mousePos.y = mousePos.y + (height / 2) + 0.5f;
 
             if (mousePos.x < width && mousePos.x >= 0 && mousePos.y < height && mousePos.y >= 0)
             {
                 //print(mousePos.x + " " + mousePos.y);
 
-                paintCircle(mousePos, 2, Color.red);
+                paintCircle(mousePos, Color.red);
             }
         }
         else if (Input.GetMouseButton(1))
         {
             Vector2 mousePos;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, Input.mousePosition, Camera.main, out mousePos);
-            mousePos.x = mousePos.x + (width / 2);
-            mousePos.y = mousePos.y + (height / 2);
+            mousePos.x = mousePos.x + (width / 2) + 0.5f;
+            mousePos.y = mousePos.y + (height / 2) + 0.5f;
 
             if (mousePos.x < width && mousePos.x >= 0 && mousePos.y < height && mousePos.y >= 0)
             {
                 //print(mousePos.x + " " + mousePos.y);
 
-                paintCircle(mousePos, 2, Color.black);
-                
+                paintCircle(mousePos, Color.black);
+
             }
         }
     }
 
-    void paintCircle(Vector2 center, int rad, Color color)
+    void paintCircle(Vector2 center, Color color)
     {
         for (int y = -rad + 1; y < rad; y++)
         {
             for (int x = -rad + 1; x < rad; x++)
             {
-                if(y*y + x*x < rad*rad)
-                textures[currentLayer].SetPixel((int)(center.x + x), (int)(center.y + y), color);
+                if (y * y + x * x < rad * rad && center.x + x < textures[0].width - 1 && center.x + x > 1 && center.y + y < textures[0].height - 1 && center.y + y > 1)
+                    textures[currentLayer].SetPixel((int)(center.x + x), (int)(center.y + y), color);
             }
         }
         textures[currentLayer].Apply();
@@ -96,7 +98,7 @@ public class Drawable : MonoBehaviour
     public void ResetToBlack(int layer)
     {
         var resetColor = new Color32(0, 0, 0, 255);
-        var resetArray = new Color32[width*height];
+        var resetArray = new Color32[width * height];
         for (int i = 0; i < resetArray.Length; i++)
         {
             resetArray[i] = resetColor;
@@ -109,5 +111,15 @@ public class Drawable : MonoBehaviour
     {
         currentLayer = (int)layer;
         rawImage.texture = textures[currentLayer];
+    }
+
+    public Texture2D[] GetTextures()
+    {
+        return textures;
+    }
+
+    public void ChangeThickness(Toggle t)
+    {
+        rad = t.isOn ? 1 : 2;
     }
 }
