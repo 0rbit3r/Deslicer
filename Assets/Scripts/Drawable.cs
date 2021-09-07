@@ -8,7 +8,7 @@ public class Drawable : MonoBehaviour
     
     public int rad = 2;
 
-    Texture2D[] textures;
+    Texture2D[] Textures { get; set; }
     RawImage rawImage;
     RectTransform rect;
     int width, height;
@@ -24,22 +24,22 @@ public class Drawable : MonoBehaviour
         height = (int)rect.rect.height;
 
         rawImage = GetComponent<RawImage>();
-        textures = new Texture2D[layers];
+        Textures = new Texture2D[layers];
         for (int i = 0; i < layers; i++)
         {
-            textures[i] = new Texture2D(width, height);
-            textures[i].filterMode = FilterMode.Point;
+            Textures[i] = new Texture2D(width, height);
+            Textures[i].filterMode = FilterMode.Point;
             ResetToBlack(i);
         }
         currentLayer = 0;
-        rawImage.texture = textures[currentLayer];
+        rawImage.texture = Textures[currentLayer];
 
         previews = new GameObject[layers];
         for (int i = 0; i < layers; i++)
         {
             previews[i] = GameObject.Find("Preview" + i);
             RawImage image = previews[i].GetComponent<RawImage>();
-            image.texture = textures[i];
+            image.texture = Textures[i];
             image.texture.filterMode = FilterMode.Point;
         }
     }
@@ -84,11 +84,11 @@ public class Drawable : MonoBehaviour
         {
             for (int x = -rad + 1; x < rad; x++)
             {
-                if (y * y + x * x < rad * rad && center.x + x < textures[0].width - 1 && center.x + x > 1 && center.y + y < textures[0].height - 1 && center.y + y > 1)
-                    textures[currentLayer].SetPixel((int)(center.x + x), (int)(center.y + y), color);
+                if (y * y + x * x < rad * rad && center.x + x < Textures[0].width - 1 && center.x + x > 1 && center.y + y < Textures[0].height - 1 && center.y + y > 1)
+                    Textures[currentLayer].SetPixel((int)(center.x + x), (int)(center.y + y), color);
             }
         }
-        textures[currentLayer].Apply();
+        Textures[currentLayer].Apply();
     }
 
     public void ResetCurrentToBlack()
@@ -103,19 +103,19 @@ public class Drawable : MonoBehaviour
         {
             resetArray[i] = resetColor;
         }
-        textures[layer].SetPixels32(resetArray);
-        textures[layer].Apply();
+        Textures[layer].SetPixels32(resetArray);
+        Textures[layer].Apply();
     }
 
     public void ChangeLayer(System.Single layer)
     {
         currentLayer = (int)layer;
-        rawImage.texture = textures[currentLayer];
+        rawImage.texture = Textures[currentLayer];
     }
 
     public Texture2D[] GetTextures()
     {
-        return textures;
+        return Textures;
     }
 
     public void ChangeThickness(Toggle t)
